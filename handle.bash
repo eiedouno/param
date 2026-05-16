@@ -2,6 +2,7 @@ param_h() {
     local -a input=("$@")
     local -A aliases
     local -A arglist
+    local -A req
     local inputpar
     local argindex
     local con
@@ -16,6 +17,7 @@ param_h() {
     for argname in "${args[@]}"; do 
 	local -n arg="$argname"
 	aliases["${arg[alias]}"]="$argname"
+	[[ -n "${arg[required]}" ]] && req["$argname"]=1
 	[[ -n "${arg[sort]}" ]] && sort["$sortindex"]="$argname" && (( sortindex++ ))
 	arglist["$argname"]=1
     done
@@ -118,6 +120,9 @@ param_handle() {
 
     fi
 
+    if [[ -n ${req["$passed"]} ]]; then
+	[[ -z ${arg[value]} ]] && printf "%b" "You must specify $passed."
+    fi
 }
 
 
