@@ -3,6 +3,7 @@ param_h() {
     local -A aliases
     local -A arglist
     local -A req
+    local arg
     local inputpar
     local argindex
     local con
@@ -38,6 +39,10 @@ param_h() {
 	fi
 	(( argindex++ ))
     done
+    for reqname in "${!req[@]}"; do
+	declare -n arg="$reqname"
+	[[ -z ${arg[value]} ]] && printf "You must specify --%s.\n" "$reqname" && exit 1
+    done
 }
 
 param_t1() {
@@ -68,7 +73,6 @@ param_t2() {
 
 
 param_handle() { 
-    local arg
     local change
 
     # If $passed equals nothing or is not an arg, error
@@ -118,10 +122,6 @@ param_handle() {
 
 	arg[value]="$change"
 
-    fi
-
-    if [[ -n ${req["$passed"]} ]]; then
-	[[ -z ${arg[value]} ]] && printf "%b" "You must specify $passed."
     fi
 }
 
