@@ -6,6 +6,7 @@ param_h() {
     local arg
     local inputpar
     local argindex
+    local displayname
     local con
     local inputpar
     local argp
@@ -17,10 +18,11 @@ param_h() {
     # Get names and aliases for parsing and validation
     for argname in "${args[@]}"; do 
 	local -n arg="$argname"
-	aliases["${arg[alias]}"]="$argname"
-	[[ -n "${arg[required]}" ]] && req["$argname"]=1
+	displayname="${arg[name]:-$argname}"
+	aliases["${arg[alias]}"]="$displayname"
+	arglist["$displayname"]="$argname"
+	[[ -n "${arg[required]}" ]] && req["$displayname"]="$argname"
 	[[ -n "${arg[sort]}" ]] && sort["$sortindex"]="$argname" && (( sortindex++ ))
-	arglist["$argname"]=1
     done
 
 
@@ -39,9 +41,9 @@ param_h() {
 	fi
 	(( argindex++ ))
     done
-    for reqname in "${!req[@]}"; do
-	declare -n arg="$reqname"
-	[[ -z ${arg[value]} ]] && param_msg "You must specify --%s.\n" "$reqname" && param_dexit
+    for displayname in "${!req[@]}"; do
+	declare -n arg="${req["$displayname"]}"
+	[[ -z ${arg[value]} ]] && param_msg "You must specify --%s.\n" "$displayname" && param_dexit
     done
 }
 
@@ -76,10 +78,11 @@ param_handle() {
     local change
 
     # If $passed equals nothing or is not an arg, error
-    [[ -z "$passed" || ! "${arglist["$passed"]}" ]] && param_msg "%b" "Unknown argument: $char.\n" && param_dexit
+    [[ -z "$passed" || ! "${arglist["$passed"]}" ]] && param_msg "%b" "Unknown argument: ${passed:-$char}.\n" && param_dexit
 
     # point arg to the passed arg's metadata
-    declare -n arg="$passed"
+    local targetvar="${arglist["$passed"]}"	
+    declare -n arg="$targetvar"
     local type="${arg[type]}"
 
     if [[ "$type" == "bool" ]]; then
@@ -152,7 +155,7 @@ param_c() {
 	return
     fi
 
-    [[ -z "${sort[@]}" ]] && param_msg "%b" "Unknown argument: $con.\n" && param_dexit
+    [[ -z "${sort[*]}" ]] && param_msg "%b" "Unknown argument: $con.\n" && param_dexit
     
     passed="${sort["$isorti"]}"
     [[ -z "$passed" ]] && param_msg "%b" "Unknown argument: $con.\n" && param_dexit
