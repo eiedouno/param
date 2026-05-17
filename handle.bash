@@ -19,7 +19,7 @@ param_h() {
     for argname in "${args[@]}"; do 
 	local -n arg="$argname"
 	displayname="${arg[name]:-$argname}"
-	aliases["${arg[alias]}"]="$displayname"
+	[[ -n "${arg[alias]}" ]] && aliases["${arg[alias]}"]="$displayname"
 	arglist["$displayname"]="$argname"
 	[[ -n "${arg[required]}" ]] && req["$displayname"]="$argname"
 	[[ -n "${arg[sort]}" ]] && sort["$sortindex"]="$argname" && (( sortindex++ ))
