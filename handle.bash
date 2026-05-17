@@ -41,7 +41,7 @@ param_h() {
     done
     for reqname in "${!req[@]}"; do
 	declare -n arg="$reqname"
-	[[ -z ${arg[value]} ]] && printf "You must specify --%s.\n" "$reqname" && exit 1
+	[[ -z ${arg[value]} ]] && param_msg "You must specify --%s.\n" "$reqname" && param_dexit
     done
 }
 
@@ -56,7 +56,7 @@ param_t1() {
 	local passed="${aliases["$char"]}"
 
 	# make sure input isn't needed
-	[[ $inputpar == "true" ]] && printf "%b" "Input must be specified after $passed.\n" && exit 1
+	[[ $inputpar == "true" ]] && param_msg "%b" "Input must be specified after $passed.\n" && param_dexit
 
 	param_handle
 
@@ -76,7 +76,7 @@ param_handle() {
     local change
 
     # If $passed equals nothing or is not an arg, error
-    [[ -z "$passed" || ! "${arglist["$passed"]}" ]] && printf "%b" "Unknown argument: $char.\n" && exit 1
+    [[ -z "$passed" || ! "${arglist["$passed"]}" ]] && param_msg "%b" "Unknown argument: $char.\n" && param_dexit
 
     # point arg to the passed arg's metadata
     declare -n arg="$passed"
@@ -107,7 +107,7 @@ param_handle() {
 
 	param_changev
 
-	[[ ! -f "$change" ]] && printf "%b" "File $change does not exist.\n" && exit 1
+	[[ ! -f "$change" ]] && param_msg "%b" "File $change does not exist.\n" && param_dexit
 
 	arg[value]="$change"
 
@@ -118,7 +118,7 @@ param_handle() {
 
 	param_changev
 
-	[[ ! -d "$change" ]] && printf "%b" "Directory $change does not exist.\n" && exit 1
+	[[ ! -d "$change" ]] && param_msg "%b" "Directory $change does not exist.\n" && param_dexit
 
 	arg[value]="$change"
 
@@ -128,7 +128,20 @@ param_handle() {
 
 
 param_changev() {
-    [[ "$change" == -* || -z "$change" ]] && printf "%b" "Input must be specified after $passed.\n" && exit 1
+    [[ "$change" == -* || -z "$change" ]] && param_msg "%b" "Input must be specified after $passed.\n" && param_dexit
+}
+
+
+
+param_dexit() {
+    [[ "$PARAM_AUTO_EXIT" != "false" ]] && exit 1
+}
+
+
+
+param_msg() {
+    [[ "$PARAM_ERROR_MSG" != "false" ]] && printf "$1" "$2"
+    return 0
 }
 
 
@@ -139,10 +152,10 @@ param_c() {
 	return
     fi
 
-    [[ -z "${sort[@]}" ]] && printf "%b" "Unknown argument: $con.\n" && exit 1
+    [[ -z "${sort[@]}" ]] && param_msg "%b" "Unknown argument: $con.\n" && param_dexit
     
     passed="${sort["$isorti"]}"
-    [[ -z "$passed" ]] && printf "%b" "Unknown argument: $con.\n" && exit 1
+    [[ -z "$passed" ]] && param_msg "%b" "Unknown argument: $con.\n" && param_dexit
 
     (( argindex-- ))
     param_handle
