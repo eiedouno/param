@@ -160,7 +160,7 @@ param_c() {
 	return
     fi
 
-    [[ -z "${sort[*]}" ]] && param_msg "%b" "Unknown argument: $con.\n" && param_dexit
+    [[ -z "${sort[*]}" || -z "${sort["$isorti"]}" ]] && param_msg "%b" "Unknown argument: $con.\n" && param_dexit
     
     passed="${sort["$isorti"]}"
     if [[ -z "$passed" ]]; then
