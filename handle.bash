@@ -79,7 +79,10 @@ param_handle() {
     local change
 
     # If $passed equals nothing or is not an arg, error
-    [[ -z "$passed" || ! "${arglist["$passed"]}" ]] && param_msg "%b" "Unknown argument: ${passed:-$char}.\n" && param_dexit
+    if [[ -z "$passed" || -z "${arglist["$passed"]}" ]]; then
+	param_msg "%b" "Unknown argument: ${passed:-$char}.\n"
+	param_dexit || return 1
+    fi
 
     # point arg to the passed arg's metadata
     local targetvar="${arglist["$passed"]}"	
@@ -139,6 +142,7 @@ param_changev() {
 
 param_dexit() {
     [[ "$PARAM_AUTO_EXIT" != "false" ]] && exit 1
+    return 1
 }
 
 
@@ -159,10 +163,13 @@ param_c() {
     [[ -z "${sort[*]}" ]] && param_msg "%b" "Unknown argument: $con.\n" && param_dexit
     
     passed="${sort["$isorti"]}"
-    [[ -z "$passed" ]] && param_msg "%b" "Unknown argument: $con.\n" && param_dexit
+    if [[ -z "$passed" ]]; then
+	param_msg "%b" "Unknown argument: $con.\n"
+	param_dexit || return 1
+    fi
 
     (( argindex-- ))
-    param_handle
+    param_handle || return 1
     (( argindex++ ))
     inputpar="false"
     (( isorti++ ))
