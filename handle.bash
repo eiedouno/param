@@ -15,6 +15,8 @@ param_h() {
     local sortindex=1
     local isorti=1
 
+    param_extra=()
+
     # Get names and aliases for parsing and validation
     for argname in "${args[@]}"; do 
 	local -n arg="$argname"
