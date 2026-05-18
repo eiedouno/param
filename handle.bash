@@ -83,6 +83,7 @@ param_handle() {
     # If $passed equals nothing or is not an arg, error
     if [[ -z "$passed" || -z "${arglist["$passed"]}" ]]; then
 	param_msg "%b" "Unknown argument: ${passed:-$char}.\n"
+	[[ -n "$passed" ]] && param_extra+=("${passed:--$char}")
 	param_dexit || return 1
     fi
 
