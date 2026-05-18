@@ -19,7 +19,7 @@ param_h() {
     for argname in "${args[@]}"; do 
 	local -n arg="$argname"
 	displayname="${arg[name]:-$argname}"
-	[[ -z "${arg[type]}" ]] && param_msg "You must specify a type for %s.\n" "$argname" && param_dexit
+	[[ -z "${arg[type]}" ]] && printf "You must specify a type for %s.\n" "$argname" && exit 1
 	[[ -n "${arg[alias]}" ]] && aliases["${arg[alias]}"]="$displayname"
 	arglist["$displayname"]="$argname"
 	[[ -n "${arg[required]}" ]] && req["$displayname"]="$argname"
@@ -160,7 +160,12 @@ param_c() {
 	return
     fi
 
-    [[ -z "${sort[*]}" || -z "${sort["$isorti"]}" ]] && param_msg "%b" "Unknown argument: $con.\n" && param_dexit
+    if [[ -z "${sort[*]}" ]]; then
+	param_extra+=("$con")
+	return 0
+    fi
+
+    [[ -z "${sort["$isorti"]}" ]] && param_msg "%b" "Unknown argument: $con.\n" && param_dexit
     
     passed="${sort["$isorti"]}"
     if [[ -z "$passed" ]]; then
