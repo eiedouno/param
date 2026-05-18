@@ -19,6 +19,7 @@ param_h() {
     for argname in "${args[@]}"; do 
 	local -n arg="$argname"
 	displayname="${arg[name]:-$argname}"
+	[[ -z "{arg[type]}" ]] && param_msg "You must specify a type for %s." "$argname" && param_dexit
 	[[ -n "${arg[alias]}" ]] && aliases["${arg[alias]}"]="$displayname"
 	arglist["$displayname"]="$argname"
 	[[ -n "${arg[required]}" ]] && req["$displayname"]="$argname"
