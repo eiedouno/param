@@ -60,6 +60,15 @@ param_t1() {
 	# get $char's alias pointer
 	local passed="${aliases["$char"]}"
 
+
+	# If $passed equals nothing or is not an arg, error
+	if [[ -z "$passed" || -z "${arglist["$passed"]}" ]]; then
+	    param_msg "%b" "Unknown argument: $char.\n"
+	    param_extra+=("-$char")
+	    param_dexit || continue
+	fi
+
+
 	# make sure input isn't needed
 	[[ $inputpar == "true" ]] && param_msg "%b" "Input must be specified after $passed.\n" && param_dexit
 
@@ -72,6 +81,14 @@ param_t1() {
 
 param_t2() {
     local passed="$con"
+
+    # If $passed equals nothing or is not an arg, error
+    if [[ -z "$passed" || -z "${arglist["$passed"]}" ]]; then
+	param_msg "%b" "Unknown argument: $passed.\n"
+	param_extra+=("--$passed")
+	param_dexit || return 1
+    fi
+
     param_handle
 }
 
@@ -80,12 +97,6 @@ param_t2() {
 param_handle() { 
     local change
 
-    # If $passed equals nothing or is not an arg, error
-    if [[ -z "$passed" || -z "${arglist["$passed"]}" ]]; then
-	param_msg "%b" "Unknown argument: ${passed:-$char}.\n"
-	[[ -n "$passed" ]] && param_extra+=("${passed:--$char}")
-	param_dexit || return 1
-    fi
 
     # point arg to the passed arg's metadata
     local targetvar="${arglist["$passed"]}"	
